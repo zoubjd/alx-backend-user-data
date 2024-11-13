@@ -13,6 +13,7 @@ def status() -> str:
     """
     return jsonify({"status": "OK"})
 
+
 @app_views.route('/unauthorized', methods=['GET'], strict_slashes=False)
 def unauthorized() -> str:
     """ GET /api/v1/unauthorized
@@ -20,24 +21,27 @@ def unauthorized() -> str:
       - raise a 401 error by using abort"""
     abort(401)
 
+
 @app_views.app_errorhandler(401)
 def return_unauthorized(error) -> str:
     """ Unauthorized handler
     """
     return jsonify({"error": "Unauthorized"}), 401
 
+
 @app_views.route('/forbidden', methods=['GET'], strict_slashes=False)
 def forbidden() -> str:
-  """ GET /api/v1/forbidden
-  Return:
+    """ GET /api/v1/forbidden
+    Return:
     - raise a 403 error by using abort"""
-  abort(403)
+    abort(403)
+
 
 @app_views.app_errorhandler(403)
 def return_forbidden(error) -> str:
-  """ Forbidden handler
-  """
-  return jsonify({"error": "Forbidden"}), 403
+    """ Forbidden handler
+    """
+    return jsonify({"error": "Forbidden"}), 403
 
 
 @app_views.route('/stats/', strict_slashes=False)
