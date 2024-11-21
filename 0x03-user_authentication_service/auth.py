@@ -22,7 +22,7 @@ class Auth:
 
     def __init__(self):
         self._db = DB()
-    
+
     def register_user(self, email: str, password: str) -> User:
         """Registers a User"""
         user = self._db._session.query(User).filter_by(email=email).first()
@@ -63,3 +63,49 @@ class Auth:
         user.session_id = id
         self._db._session.commit()
         return id
+
+    def get_user_from_session_id(self, session_id: str) -> User:
+        """gets the user based on the session id"""
+        if session_id is None:
+            return None
+        user = self._db._session.query(
+            User).filter_by(session_id=session_id).first()
+        if user is None:
+            return None
+
+        return user
+
+    def destroy_session(self, user_id: int) -> None:
+        """destroys the session id based on a user id"""
+        if user_id is None:
+            return None
+        user = self._db._session.query(User).filter_by(id=user_id).first()
+        if user is None:
+            return
+        user.session_id = None
+        self._db._session.commit()
+
+    def get_reset_password_token(self, email: str) -> str:
+        """generates a password reset token"""
+        if email is None:
+            return None
+        user = self._db._session.query(User).filter_by(email=email).first()
+        if user is None:
+            raise ValueError()
+        token = str(uuid.uuid4())
+        user.reset_token = token
+        self._db._session.commit()
+        return token
+
+    def update_password(self, reset_token: str, new_pwd: str) -> None:
+        """updates the lost password"""
+        if reset_token is None or new_pwd is None:
+            raise ValueError()
+        user = self._db._session.query(
+            User).filter_by(reset_token=reset_token).first()
+        if user is None:
+            raise ValueError()
+        new_hash = _hash_password(new_pwd)
+        user.hashed_password = new_hash
+        user.reset_token = None
+        self._db._session.commit()
